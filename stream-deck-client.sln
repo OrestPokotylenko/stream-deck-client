@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35303.130
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "stream-deck-client", "stream-deck-client\stream-deck-client.csproj", "{DE4D2BAD-27F6-4C88-823A-BF7CF9922E22}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DE4D2BAD-27F6-4C88-823A-BF7CF9922E22}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE4D2BAD-27F6-4C88-823A-BF7CF9922E22}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE4D2BAD-27F6-4C88-823A-BF7CF9922E22}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DE4D2BAD-27F6-4C88-823A-BF7CF9922E22}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {697271F9-E76D-4D7A-B910-6F80ECED7EC4}
+	EndGlobalSection
+EndGlobal
