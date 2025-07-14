@@ -1,17 +1,17 @@
-﻿using System;
-using System.IO.Ports;
+﻿using System.IO.Ports;
+using DotNetEnv;
 
-namespace stream_deck_client.utility
+namespace stream_deck_client.Utility
 {
     public class PortController
     {
-        private static SerialPort port;
+        private static SerialPort? port;
 
         public void InitPort()
         {
             string songName = "Stan";
 
-            port = new("COM3", 115200);
+            port = new(Env.GetString("PORT_NAME"), Env.GetInt("PORT_BOUD_RATE"));
             port.Open();
 
             Console.WriteLine("Sending data...");
