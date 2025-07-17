@@ -1,4 +1,4 @@
-﻿namespace stream_deck_client.Enum
+﻿namespace stream_deck_client.Enums
 {
     public enum CommandType
     {
