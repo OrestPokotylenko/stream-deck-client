@@ -1,11 +1,11 @@
 ﻿using SpotifyAPI.Web;
 using stream_deck_client.DTO;
-using stream_deck_client.Enum;
+using stream_deck_client.Enums;
 using System;
 
 namespace stream_deck_client.Service
 {
-    internal class SpotifyController
+    public class SpotifyController
     {
         private readonly SpotifyClient _client;
         private readonly Dictionary<CommandType, Func<Task>> _commands;

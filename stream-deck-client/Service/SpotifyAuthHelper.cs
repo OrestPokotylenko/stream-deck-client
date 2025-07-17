@@ -6,7 +6,7 @@ using DotNetEnv;
 
 namespace stream_deck_client.Service
 {
-    internal class SpotifyAuthHelper
+    public class SpotifyAuthHelper
     {
         private static async Task<(SpotifyClient, string)> AuthorizeWithPKCE()
         {
@@ -101,7 +101,7 @@ namespace stream_deck_client.Service
 
             Console.WriteLine("Starting full browser authorization flow...");
             (var spotifyClient, var newRefreshToken) = await AuthorizeWithPKCE();
-            FileUtility.WriteFile("token_storage.txt", newRefreshToken);
+            FileUtility.WriteFile(Env.GetString("TOKEN_STORAGE_FILE"), newRefreshToken);
             Console.WriteLine("Successfully logged in and saved new refresh token.");
 
             return spotifyClient;
