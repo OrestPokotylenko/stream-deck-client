@@ -1,7 +1,6 @@
 ﻿using SpotifyAPI.Web;
 using stream_deck_client.DTO;
 using stream_deck_client.Enums;
-using System;
 
 namespace stream_deck_client.Service
 {
@@ -15,13 +14,13 @@ namespace stream_deck_client.Service
             _client = client;
             _commands = new Dictionary<CommandType, Func<Task>>
             {
-                { CommandType.PREVIOUS_TRACK, async () => await PreviousSong() },
-                { CommandType.NEXT_TRACK, async () => await NextSong() },
-                { CommandType.PLAY_PAUSE, async () => await PlayPause() }
+                { CommandType.PREVIOUS_TRACK, async () => await PreviousSongAsync() },
+                { CommandType.NEXT_TRACK, async () => await NextSongAsync() },
+                { CommandType.PLAY_PAUSE, async () => await PlayPauseAsync() }
             };
         }
 
-        public async Task<Song?> GetCurrentSong()
+        public async Task<Song?> GetCurrentSongAsync()
         {
             CurrentlyPlayingContext playback = await _client.Player.GetCurrentPlayback();
 
@@ -33,24 +32,22 @@ namespace stream_deck_client.Service
             return null;
         }
 
-        private async Task NextSong()
+        private async Task NextSongAsync()
         {
             await _client.Player.SkipNext();
         }
 
-        private async Task PreviousSong()
+        private async Task PreviousSongAsync()
         {
             await _client.Player.SkipPrevious();
         }
 
-        private async Task PlayPause()
+        private async Task PlayPauseAsync()
         {
             CurrentlyPlayingContext? playback = await _client.Player.GetCurrentPlayback();
 
             if (playback == null)
             {
-                // Try to resume playback anyway
-                Console.WriteLine("No current playback info, trying to resume.");
                 await _client.Player.ResumePlayback();
             }
             else if (playback.IsPlaying)
@@ -63,7 +60,12 @@ namespace stream_deck_client.Service
             }
         }
 
-        public async Task GetCommand(CommandType commandType)
+        public async Task ChangeVolumeAsync(int volume)
+        {
+            await _client.Player.SetVolume(new PlayerVolumeRequest(volume));
+        }
+
+        public async Task GetCommandAsync(CommandType commandType)
         {
             await _commands[commandType]();
         }

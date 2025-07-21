@@ -10,7 +10,9 @@ namespace stream_deck_client.Service
         private readonly PortController _portController;
         private readonly SpotifyController _spotifyController;
         private string _lastSongName = "";
-        private const string ENV_PATH = "../../../.env";
+        private const string EnvPath = "../../../.env";
+        private const string VolumeCommand = "VOLUME";
+        private const string StandardCommand = "COMMAND";
 
         private AppCommunicator(PortController portController, SpotifyController spotifyController)
         {
@@ -20,7 +22,7 @@ namespace stream_deck_client.Service
 
         public static async Task<AppCommunicator> Create()
         {
-            Env.Load(ENV_PATH);
+            Env.Load(EnvPath);
 
             var portController = new PortController();
             portController.InitPort();
@@ -32,25 +34,37 @@ namespace stream_deck_client.Service
 
         private Task ListenForArduinoCommands()
         {
-            return Task.Run(() =>
+            return Task.Run(async () =>
             {
                 while (true)
                 {
-                    string command = _portController.ReadLine();
-                    Console.WriteLine($"Command: {command}");
+                    string? input = _portController.ReadLine();
 
-                    if (string.IsNullOrEmpty(command))
+                    if (!CommandParser.TryParse(input, out string key, out string value))
                     {
+                        Console.WriteLine($"Invalid input: {input}");
                         continue;
                     }
 
-                    if (Enum.TryParse<CommandType>(command, out var commandType))
+                    try
                     {
-                        _spotifyController.GetCommand(commandType).Wait();
+                        if (key == VolumeCommand && int.TryParse(value, out int volume))
+                        {
+                            await _spotifyController.ChangeVolumeAsync(volume);
+                            continue;
+                        }
+
+                        if (key == StandardCommand && Enum.TryParse<CommandType>(value, true, out var commandType))
+                        {
+                            await _spotifyController.GetCommandAsync(commandType);
+                            continue;
+                        }
+
+                        Console.WriteLine($"Unknown command key or value: {input}");
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        Console.WriteLine($"Invalid command: {command}");
+                        Console.WriteLine($"Error processing command: {ex.Message}");
                     }
                 }
             });
@@ -60,7 +74,7 @@ namespace stream_deck_client.Service
         {
             while (true)
             {
-                Song? song = await _spotifyController.GetCurrentSong();
+                Song? song = await _spotifyController.GetCurrentSongAsync();
 
                 if (song is not null && song._name != _lastSongName)
                 {
