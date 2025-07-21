@@ -1,0 +1,1 @@
+This is a C# desktop application that connects to your Spotify account using the official Spotify Web API. It listens to commands sent by the Arduino and executes them (like play, pause, next song). It also sends back song information to display on the Arduino screen.
