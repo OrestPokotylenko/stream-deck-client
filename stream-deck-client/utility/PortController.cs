@@ -3,15 +3,10 @@ using DotNetEnv;
 
 namespace stream_deck_client.Utility
 {
-    public class PortController
+    internal class PortController(LogUtility logUtility)
     {
         private static SerialPort? _port;
-        private readonly LogUtility _log;
-
-        public PortController(LogUtility logUtility)
-        {
-            _log = logUtility;
-        }
+        private readonly LogUtility _log = logUtility;
 
         private bool TryOpenPort()
         {

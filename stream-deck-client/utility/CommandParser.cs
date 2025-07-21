@@ -1,6 +1,6 @@
 ﻿namespace stream_deck_client.Utility
 {
-    public static class CommandParser
+    internal static class CommandParser
     {
         public static bool TryParse(string? input, out string key, out string value)
         {

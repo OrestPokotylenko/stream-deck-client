@@ -1,6 +1,6 @@
 ﻿namespace stream_deck_client.Utility
 {
-    public static class FileUtility
+    internal static class FileUtility
     {
         public static void WriteFile(string fileName, string input)
         {

@@ -6,7 +6,7 @@ using DotNetEnv;
 
 namespace stream_deck_client.Service
 {
-    public class SpotifyAuthHelper
+    internal class SpotifyAuthHelper
     {
         private readonly LogUtility _log;
 

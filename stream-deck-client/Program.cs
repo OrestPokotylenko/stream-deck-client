@@ -13,7 +13,21 @@ namespace stream_deck_client
             Env.Load(EnvPath);
             LogUtility logUtility = new();
             AppCommunicator appCommunicator = await AppCommunicator.Create(logUtility);
-            await appCommunicator.ListenForCommands();
+
+            while (true)
+            {
+                await SpotifyProcessWatcher.WaitForSpotifyAsync();
+
+                using var cts = new CancellationTokenSource();
+                var mainTask = Task.Run(() => appCommunicator.ListenForCommands(cts.Token), cts.Token);
+
+                while (SpotifyProcessWatcher.IsSpotifyRunning())
+                {
+                    await Task.Delay(2000);
+                }
+
+                cts.Cancel();
+            }
         }
     }
 }
