@@ -9,27 +9,31 @@ namespace stream_deck_client.Service
     {
         private readonly PortController _portController;
         private readonly SpotifyController _spotifyController;
+        private readonly LogUtility _log;
+
         private string _lastSongName = "";
         private const string EnvPath = "../../../.env";
         private const string VolumeCommand = "VOLUME";
         private const string StandardCommand = "COMMAND";
 
-        private AppCommunicator(PortController portController, SpotifyController spotifyController)
+        private AppCommunicator(PortController portController, SpotifyController spotifyController, LogUtility log)
         {
             _portController = portController;
             _spotifyController = spotifyController;
+            _log = log;
         }
 
-        public static async Task<AppCommunicator> Create()
+        public static async Task<AppCommunicator> Create(LogUtility logUtility)
         {
             Env.Load(EnvPath);
 
-            var portController = new PortController();
+            PortController portController = new(logUtility);
             portController.InitPort();
 
-            var spotifyController = new SpotifyController(await SpotifyAuthHelper.Auth());
+            SpotifyAuthHelper spotifyAuthHelper = new(logUtility);
+            var spotifyController = new SpotifyController(await spotifyAuthHelper.Auth());
 
-            return new AppCommunicator(portController, spotifyController);
+            return new AppCommunicator(portController, spotifyController, logUtility);
         }
 
         private Task ListenForArduinoCommands()
@@ -42,7 +46,7 @@ namespace stream_deck_client.Service
 
                     if (!CommandParser.TryParse(input, out string key, out string value))
                     {
-                        Console.WriteLine($"Invalid input: {input}");
+                        _log.WriteLog($"Invalid input: {input}");
                         continue;
                     }
 
@@ -60,11 +64,11 @@ namespace stream_deck_client.Service
                             continue;
                         }
 
-                        Console.WriteLine($"Unknown command key or value: {input}");
+                        _log.WriteLog($"Unknown command key or value: {input}");
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"Error processing command: {ex.Message}");
+                        _log.WriteLog($"Error processing command: {ex.Message}");
                     }
                 }
             });
@@ -79,7 +83,6 @@ namespace stream_deck_client.Service
                 if (song is not null && song._name != _lastSongName)
                 {
                     _portController.WriteSong(song._name, song._duration);
-                    Console.WriteLine(song._name);
                     _lastSongName = song._name;
                 }
 
