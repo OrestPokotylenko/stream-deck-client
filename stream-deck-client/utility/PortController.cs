@@ -13,39 +13,62 @@ namespace stream_deck_client.Utility
             _log = logUtility;
         }
 
-        public void InitPort()
+        private bool TryOpenPort()
         {
-            _port = new(Env.GetString("PORT_NAME"), Env.GetInt("PORT_BOUD_RATE"));
+            _port ??= new(Env.GetString("PORT_NAME"), Env.GetInt("PORT_BOUD_RATE"));
 
-            try
+            if (!_port.IsOpen)
             {
-                _port.Open();
+                try
+                {
+                    _port.Open();
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    _log.WriteLog($"Failed to open port: {ex.Message}");
+                    return false;
+                }
             }
-            catch (Exception ex)
-            {
-                _log.WriteLog($"Failed to open port: {ex.Message}");
-            }
+
+            return true;
         }
 
         public void ClosePort()
         {
-            _port?.Close();
+            if (_port is not null && _port.IsOpen)
+            {
+                _port?.Close();
+            }
         }
 
-        private void WriteToPort(string data)
+        private bool WriteToPort(string data)
         {
-            _port?.WriteLine(data);
+            if (TryOpenPort())
+            {
+                _port?.WriteLine(data);
+                return true;
+            }
+
+            return false;
         }
 
-        public void WriteSong(string name, string duration)
+        public bool WriteSong(string name, string duration)
         {
-            WriteToPort(name);
-            WriteToPort(duration);
+            bool nameWritten = WriteToPort(name);
+            bool durationWritten = WriteToPort(duration);
+
+            return nameWritten && durationWritten;
         }
 
         public string? ReadLine()
         {
-            return _port?.ReadLine();
+            if (TryOpenPort())
+            {
+                return _port?.ReadLine();
+            }
+
+            return null;
         }
     }
 }
