@@ -8,7 +8,14 @@ namespace stream_deck_client.Service
 {
     public class SpotifyAuthHelper
     {
-        private static async Task<(SpotifyClient, string)> AuthorizeWithPKCE()
+        private readonly LogUtility _log;
+
+        public SpotifyAuthHelper(LogUtility log)
+        {
+            _log = log;
+        }
+
+        private async Task<(SpotifyClient, string)> AuthorizeWithPKCE()
         {
             // Create PKCE verifier & challenge
             var (verifier, challenge) = PKCEUtil.GenerateCodes(120);
@@ -48,17 +55,14 @@ namespace stream_deck_client.Service
             }
             catch (Exception)
             {
-                Console.WriteLine("Couldn't open browser automatically. Please open this URL manually:");
-                Console.WriteLine(request.ToUri());
+                _log.WriteLog($"Couldn't open browser automatically. Please open this URL manually: {request.ToUri()}");
             }
-
-            Console.WriteLine("Please login to Spotify in your browser...");
 
             // Wait until the callback handler completes
             return await tcs.Task;
         }
 
-        private static async Task<SpotifyClient> AuthWithRefreshToken(string refreshToken)
+        private async Task<SpotifyClient> AuthWithRefreshToken(string refreshToken)
         {
             var newToken = await new OAuthClient().RequestToken(
                 new PKCETokenRefreshRequest(Env.GetString("SPOTIFY_CLIENT_ID"), refreshToken));
@@ -66,7 +70,7 @@ namespace stream_deck_client.Service
             return new SpotifyClient(newToken.AccessToken);
         }
 
-        public static async Task<SpotifyClient> Auth()
+        public async Task<SpotifyClient> Auth()
         {
             string refreshToken = FileUtility.ReadFile("token_storage.txt");
 
@@ -74,7 +78,6 @@ namespace stream_deck_client.Service
             {
                 try
                 {
-                    Console.WriteLine("Trying to use stored refresh token...");
                     var newToken = await new OAuthClient().RequestToken(
                         new PKCETokenRefreshRequest(Env.GetString("SPOTIFY_CLIENT_ID"), refreshToken)
                     );
@@ -83,26 +86,22 @@ namespace stream_deck_client.Service
                     if (!string.IsNullOrEmpty(newToken.RefreshToken))
                     {
                         FileUtility.WriteFile("token_storage.txt", newToken.RefreshToken);
-                        Console.WriteLine("Saved new rotated refresh token.");
                     }
 
-                    Console.WriteLine("Logged in via refresh token.");
                     return new SpotifyClient(newToken.AccessToken);
                 }
                 catch (APIException e) when (e.Message.Contains("invalid_grant"))
                 {
-                    Console.WriteLine("Refresh token invalid or expired, falling back to full browser login...");
+                    _log.WriteLog("Refresh token invalid or expired, falling back to full browser login...");
                 }
                 catch (APIException e)
                 {
-                    Console.WriteLine($"Spotify API error during refresh: {e.Message}, falling back to full browser login...");
+                    _log.WriteLog($"Spotify API error during refresh: {e.Message}, falling back to full browser login...");
                 }
             }
 
-            Console.WriteLine("Starting full browser authorization flow...");
             (var spotifyClient, var newRefreshToken) = await AuthorizeWithPKCE();
             FileUtility.WriteFile(Env.GetString("TOKEN_STORAGE_FILE"), newRefreshToken);
-            Console.WriteLine("Successfully logged in and saved new refresh token.");
 
             return spotifyClient;
         }
