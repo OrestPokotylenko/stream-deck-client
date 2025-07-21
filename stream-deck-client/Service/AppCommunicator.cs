@@ -12,7 +12,8 @@ namespace stream_deck_client.Service
         private readonly LogUtility _log;
 
         private string _lastSongName = "";
-        private const string EnvPath = "../../../.env";
+        private bool lastSongWritten = false;
+
         private const string VolumeCommand = "VOLUME";
         private const string StandardCommand = "COMMAND";
 
@@ -25,10 +26,7 @@ namespace stream_deck_client.Service
 
         public static async Task<AppCommunicator> Create(LogUtility logUtility)
         {
-            Env.Load(EnvPath);
-
             PortController portController = new(logUtility);
-            portController.InitPort();
 
             SpotifyAuthHelper spotifyAuthHelper = new(logUtility);
             var spotifyController = new SpotifyController(await spotifyAuthHelper.Auth());
@@ -80,9 +78,9 @@ namespace stream_deck_client.Service
             {
                 Song? song = await _spotifyController.GetCurrentSongAsync();
 
-                if (song is not null && song._name != _lastSongName)
+                if (song is not null && (song._name != _lastSongName || !lastSongWritten))
                 {
-                    _portController.WriteSong(song._name, song._duration);
+                    lastSongWritten = _portController.WriteSong(song._name, song._duration);
                     _lastSongName = song._name;
                 }
 

@@ -1,4 +1,5 @@
 ﻿using Serilog;
+using DotNetEnv;
 
 namespace stream_deck_client.Utility
 {
@@ -6,8 +7,9 @@ namespace stream_deck_client.Utility
     {
         public LogUtility()
         {
+            string tempPath = Path.Combine(Path.GetTempPath(), Env.GetString("LOG_FILE"));
             Log.Logger = new LoggerConfiguration()
-                .WriteTo.File("log.txt")
+                .WriteTo.File(tempPath)
                 .CreateLogger();
         }
 
