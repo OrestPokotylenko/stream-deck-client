@@ -4,7 +4,7 @@ using stream_deck_client.Enums;
 
 namespace stream_deck_client.Service
 {
-    public class SpotifyController
+    internal class SpotifyController
     {
         private readonly SpotifyClient _client;
         private readonly Dictionary<CommandType, Func<Task>> _commands;

@@ -1,14 +1,8 @@
 ﻿namespace stream_deck_client.DTO
 {
-    public class Song
+    internal class Song(string name, string duration)
     {
-        public string _name;
-        public string _duration;
-
-        public Song(string name, string duration)
-        {
-            _name = name;
-            _duration = duration;
-        }
+        public string _name = name;
+        public string _duration = duration;
     }
 }

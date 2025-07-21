@@ -3,7 +3,7 @@ using DotNetEnv;
 
 namespace stream_deck_client.Utility
 {
-    public class LogUtility
+    internal class LogUtility
     {
         public LogUtility()
         {

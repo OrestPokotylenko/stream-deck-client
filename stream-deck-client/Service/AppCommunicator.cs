@@ -2,10 +2,11 @@
 using stream_deck_client.DTO;
 using stream_deck_client.Enums;
 using stream_deck_client.Utility;
+using System.Threading;
 
 namespace stream_deck_client.Service
 {
-    public class AppCommunicator
+    internal class AppCommunicator
     {
         private readonly PortController _portController;
         private readonly SpotifyController _spotifyController;
@@ -34,11 +35,11 @@ namespace stream_deck_client.Service
             return new AppCommunicator(portController, spotifyController, logUtility);
         }
 
-        private Task ListenForArduinoCommands()
+        private Task ListenForArduinoCommands(CancellationToken cancellationToken)
         {
             return Task.Run(async () =>
             {
-                while (true)
+                while (!cancellationToken.IsCancellationRequested)
                 {
                     string? input = _portController.ReadLine();
 
@@ -69,12 +70,12 @@ namespace stream_deck_client.Service
                         _log.WriteLog($"Error processing command: {ex.Message}");
                     }
                 }
-            });
+            }, cancellationToken);
         }
 
-        public async Task PollSongUpdates()
+        public async Task PollSongUpdates(CancellationToken cancellationToken)
         {
-            while (true)
+            while (!cancellationToken.IsCancellationRequested)
             {
                 Song? song = await _spotifyController.GetCurrentSongAsync();
 
@@ -84,14 +85,14 @@ namespace stream_deck_client.Service
                     _lastSongName = song._name;
                 }
 
-                await Task.Delay(3000);
+                await Task.Delay(3000, cancellationToken);
             }
         }
 
-        public async Task ListenForCommands()
+        public async Task ListenForCommands(CancellationToken cancellationToken)
         {
-            var commandTask = ListenForArduinoCommands();
-            var songTask = PollSongUpdates();
+            var commandTask = ListenForArduinoCommands(cancellationToken);
+            var songTask = PollSongUpdates(cancellationToken);
 
             await Task.WhenAll(songTask, commandTask);
 

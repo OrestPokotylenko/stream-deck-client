@@ -1,6 +1,6 @@
 ﻿namespace stream_deck_client.Enums
 {
-    public enum CommandType
+    internal enum CommandType
     {
         NEXT_TRACK,
         PREVIOUS_TRACK,
